@@ -1,14 +1,16 @@
-import json;
+import json
 import requests;
 from datetime import datetime;
+import langid
+from typing import List, Self
 
 class Manga:
-  def __init__(self, id):
+  def __init__(self,id:str, title:str, tags:List[str], desc:str, url:str, updated:str, rating:float, year:int, oneshot:int):
     manga_res = json.loads(requests.get(f"https://api.mangadex.org/manga/{id}",{"accept":"application/json"}).content.decode('utf8').replace("'", '"'))["data"]["attributes"]
     manga_stats = json.loads(requests.get(f"https://api.mangadex.org/statistics/manga/{id}",{"accept":"application/json"}).content.decode('utf8').replace("'", '"'))["statistics"][id]
 
     self.id = id
-    self.titles = []
+    self.title = ""
     self.tags = []
     self.desc = ""
     self.url = f"https://mangadex.org/title/{id}"
@@ -17,16 +19,19 @@ class Manga:
     self.year = manga_res["year"]
     self.oneshot = False
 
-    # Get the description
+    # Get the description and clean it
     if "en" in manga_res["description"]:
       self.desc = manga_res["description"]["en"]
 
     # Get the titles
     if "en" in manga_res["title"]:
-      self.titles.append(manga_res["title"]["en"])
-    for title in manga_res["altTitles"]:
-      if "en" in title:
-        self.titles.append(title["en"])
+      self.title = manga_res["title"]["en"]
+      lang_check = langid.classify(self.title)
+      if lang_check != None and lang_check[0] != "en" or lang_check[1] > -80.0:
+        for title in manga_res["altTitles"]:
+          if "en" in title:
+            self.title = title["en"]
+            break
     
     # Get the tags
     for tag in manga_res["tags"]:
@@ -34,6 +39,11 @@ class Manga:
         self.oneshot = True
       else:
         self.tags.append(tag["attributes"]["name"]["en"])
+
+  @classmethod
+  def from_data(cls, id:str, title:str, tags:List[str], desc:str, url:str, updated:str, rating:float, year:int, oneshot:int) -> Self:
+    cls.oneshot = bool(oneshot)
+    return cls(id = id, title = title, tags = tags, desc = desc, url = url, updated = updated, rating = rating, year = year, oneshot = bool(oneshot))
 
   def is_complete(self, chapter_id:str) -> bool:
     """Checks whether a given manga (json object) is complete."""
@@ -44,11 +54,10 @@ class Manga:
     else:
       False
 
-
   def __str__(self) -> str:
     str_rep = {
       "id":self.id,
-      "titles":self.titles,
+      "title":self.title,
       "tags":self.tags,
       "desc":self.desc,
       "url":self.url,
@@ -57,4 +66,10 @@ class Manga:
       "year":self.year,
       "oneshot":self.oneshot,
     }
-    return f'\u007b{str_rep}\u007d,'
+    return f'{str_rep}'
+  
+  def __repr__(self):
+    return self.__str__()
+  
+
+  

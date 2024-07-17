@@ -96,12 +96,5 @@ def get_recent_updates(last_update_time:str,):
   
   return mangas
 
+# get_user_follows_list()
 
-    
-get_recent_updates("2024-07-16T02:21:56")  
-
-
-# con = sql.connect("recommendations.db")
-# cur = con.cursor()
-# res = cur.execute("SELECT * FROM manga WHERE id= ?", ("9bb7e77b-c34b-4b96-b1cd-38c1aaddc06f",))
-# print(res.fetchone())
