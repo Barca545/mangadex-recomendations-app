@@ -1,37 +1,37 @@
 import json
 import requests;
-from datetime import datetime;
 import langid
 from typing import List, Self
 
 class Manga:
-  def __init__(self,id:str, title:str, tags:List[str], desc:str, url:str, updated:str, rating:float, year:int, oneshot:int):
+  def __init__(self,id:str, title:str, tags:List[str], desc:str, url:str, rating:float, year:int):
     manga_res = json.loads(requests.get(f"https://api.mangadex.org/manga/{id}",{"accept":"application/json"}).content.decode('utf8').replace("'", '"'))["data"]["attributes"]
     manga_stats = json.loads(requests.get(f"https://api.mangadex.org/statistics/manga/{id}",{"accept":"application/json"}).content.decode('utf8').replace("'", '"'))["statistics"][id]
 
     self.id = id
-    self.title = ""
+    self.title = manga_res["title"].get("en") or list(manga_res["title"].values())[0]
     self.tags = []
     self.desc = ""
     self.url = f"https://mangadex.org/title/{id}"
-    self.updated = datetime.fromisoformat("2023-11-11T01:43:07+00:00").strftime("%m/%d/%Y")
     self.rating = manga_stats["rating"]["bayesian"]
     self.year = manga_res["year"]
     self.oneshot = False
 
-    # Get the description and clean it
+    # Get the description 
     if "en" in manga_res["description"]:
       self.desc = manga_res["description"]["en"]
 
     # Get the titles
-    if "en" in manga_res["title"]:
-      self.title = manga_res["title"]["en"]
-      lang_check = langid.classify(self.title)
-      if lang_check != None and lang_check[0] != "en" or lang_check[1] > -80.0:
-        for title in manga_res["altTitles"]:
-          if "en" in title:
-            self.title = title["en"]
-            break
+    # Get the titles
+    # Check if "en" title exists
+   
+    lang_check = langid.classify(self.title)
+    # If lang_check is not English or confidence is low, check alternative titles
+    if lang_check[0] != "en" or lang_check[1] > -80.0:
+      for alt_title in manga_res["altTitles"]:
+        if "en" in alt_title:
+          self.title = alt_title["en"]
+          break
     
     # Get the tags
     for tag in manga_res["tags"]:
@@ -40,10 +40,16 @@ class Manga:
       else:
         self.tags.append(tag["attributes"]["name"]["en"])
 
+  def binarize_tags(self):
+    """Return the binary representation of a `Manga`'s tags."""
+    tags = 0
+    for tag in self.tags:
+      tags += 1 << tag_defs.index(tag)
+    return bin(tags)
+
   @classmethod
-  def from_data(cls, id:str, title:str, tags:List[str], desc:str, url:str, updated:str, rating:float, year:int, oneshot:int) -> Self:
-    cls.oneshot = bool(oneshot)
-    return cls(id = id, title = title, tags = tags, desc = desc, url = url, updated = updated, rating = rating, year = year, oneshot = bool(oneshot))
+  def from_data(cls, id:str, title:str, tags:List[str], desc:str, url:str, rating:float, year:int) -> Self:
+    return cls(id = id, title = title, tags = tags, desc = desc, url = url, rating = rating, year = year)
 
   def is_complete(self, chapter_id:str) -> bool:
     """Checks whether a given manga (json object) is complete."""
@@ -72,4 +78,80 @@ class Manga:
     return self.__str__()
   
 
-  
+tag_defs = [
+            "4-Koma",
+            "Adaptation",
+            "Anthology",
+            "Award Winning",
+            "Doujinshi",
+            "Fan Colored",
+            "Full Color",
+            "Long Strip",
+            "Official Colored",
+            "Self-Published",
+            "Web Comic",
+            "Action",
+            "Adventure",
+            "Boys' Love",
+            "Comedy",
+            "Crime",
+            "Drama",
+            "Fantasy",
+            "Girls' Love",
+            "Historical",
+            "Horror",
+            "Isekai",
+            "Magical Girls",
+            "Mecha",
+            "Medical",
+            "Mystery",
+            "Philosophical",
+            "Psychological",
+            "Romance",
+            "Sci-Fi",
+            "Slice of Life",
+            "Sports",
+            "Superhero",
+            "Thriller",
+            "Tragedy",
+            "Wuxia",
+            "Aliens",
+            "Animals",
+            "Cooking",
+            "Crossdressing"
+            "Delinquents",
+            "Demons",
+            "Genderswap",
+            "Ghosts",
+            "Gyaru",
+            "Harem",
+            "Incest",
+            "Loli",
+            "Mafia",
+            "Magic",
+            "Martial Arts",
+            "Military",
+            "Monster Girls",
+            "Monsters",
+            "Music",
+            "Ninja",
+            "Office Workers",
+            "Police",
+            "Post-Apocalyptic",
+            "Reincarnation",
+            "Reverse Harem",
+            "Samurai",
+            "School Life",
+            "Shota",
+            "Supernatural",
+            "Survival",
+            "Time Travel",
+            "Traditional Games",
+            "Vampires",
+            "Video Games",
+            "Villainess",
+            "Virtual Reality",
+            "Zombies",
+            "Gore",
+            "Sexual Violence",
+            ]

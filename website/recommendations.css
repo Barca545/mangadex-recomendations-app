@@ -1,0 +1,27 @@
+.recommendation-container {
+  vertical-align: top;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  /* Text needs to wrap */
+  /* rows need to wrap - control how many before*/
+  /* spacing when wrapping should be consistent no gaps at rows ends */
+  /* Image size should be relative to screen and it should change to fit */
+  /* Font should be bold */
+  /* mangadex uses a grid to display their stuff instead of a flexbox */
+}
+
+.recommendation-container span {
+  vertical-align: top;
+}
+
+.recommendation-item{
+  background-color: rgb(151, 194, 236);
+  padding: 10px;
+}
+
+a {
+  all: unset;
+  cursor: pointer
+}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="recommendations.js"></script>
+<link rel="stylesheet" href="recommendations.css">
+<body>
+
+<!-- https://techcommunity.microsoft.com/t5/educator-developer-blog/host-your-website-on-azure-static-web-apps-for-free/ba-p/3579709 -->
+ 
+<h1>Previous Recomendations</h1>
+<!-- Rate the previous recomendations -->
+<div id="previous-recommendation" onclick="">
+  <div>
+    <span>
+      <img src="https://mangadex.org/covers/76827d5e-30e5-4d54-be68-102cd4366853/696bf46a-7cb1-4241-923e-abb4f5dd1427.jpg" width="56" height="80"/>
+    </span>
+    <span>
+      "Hitokiri" Girl Becomes Bodyguard for Duke's Daughter
+    </span>
+  </div>
+</div>
+
+<h1>Recommended Series</h1>
+<div class="recommendation-container" id="recommended-series">
+  <script>
+    $(document).ready(()=>{
+      recommendations("recommended-series");
+    })
+  </script>
+</div>
+
+<h1>Recommended Oneshots</h1>
+<div class="recommendation-container" id="recommended-oneshots">
+  <script>
+    $(document).ready(()=>{
+      recommendations("recommended-oneshots");
+    })
+  </script>
+</div>
+
+</body>
+</html>
